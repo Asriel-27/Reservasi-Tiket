@@ -2,6 +2,9 @@
 Client gRPC Reservasi Tiket Bioskop.
 Kelompok: Omar, Rosy, Rozan
 
+Repository: https://github.com/Asriel-27/Reserve-Ticket
+Perbaikan: timeout, retry, request_id, dan streaming reconnect pada client.
+
 Contoh:
   python client_bioskop.py lihat
   python client_bioskop.py pesan A1 --nama Omar
