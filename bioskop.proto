@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package bioskop;
+
+// Kontrak layanan reservasi tiket bioskop.
+service LayananBioskop {
+  rpc GetDaftarKursi (DaftarKursiRequest) returns (DaftarKursiResponse);      // unary
+  rpc PesanKursi (PesanKursiRequest) returns (PesanKursiResponse);            // unary, dilindungi request_id
+  rpc BatalkanPesanan (BatalkanRequest) returns (BatalkanResponse);           // unary, dilindungi request_id
+  rpc StreamStatusKursi (StreamRequest) returns (stream PerubahanKursi);      // server streaming
+}
+
+enum StatusKursi {
+  TERSEDIA = 0;
+  DIPESAN = 1;
+}
+
+message Kursi {
+  string kursi_id = 1;      // contoh: "A1"
+  StatusKursi status = 2;
+  string pemesan = 3;       // kosong jika TERSEDIA
+}
+
+message DaftarKursiRequest {}
+
+message DaftarKursiResponse {
+  repeated Kursi kursi = 1;
+  int64 versi = 2;          // naik setiap ada perubahan state
+}
+
+message PesanKursiRequest {
+  string request_id = 1;    // UUID, sama untuk setiap percobaan ulang
+  string kursi_id = 2;
+  string pemesan = 3;       // NIM / nama
+}
+
+message PesanKursiResponse {
+  bool sukses = 1;
+  string pesan = 2;
+  string kursi_id = 3;
+  bool duplikat = 4;        // true jika server menjawab dari catatan request_id
+}
+
+message BatalkanRequest {
+  string request_id = 1;
+  string kursi_id = 2;
+  string pemesan = 3;       // hanya pemesan asli yang boleh membatalkan
+}
+
+message BatalkanResponse {
+  bool sukses = 1;
+  string pesan = 2;
+  bool duplikat = 3;
+}
+
+message StreamRequest {
+  bool kirim_snapshot = 1;  // true: kirim dulu semua kursi yang sudah dipesan
+}
+
+message PerubahanKursi {
+  string kursi_id = 1;
+  StatusKursi status = 2;
+  string pemesan = 3;
+  string waktu = 4;
+  int64 versi = 5;
+}
